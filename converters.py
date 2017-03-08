@@ -1,3 +1,4 @@
+from models import Wings
 def wing_from_lednicer(data):
     middle_point = int((len(data) - 1) / 2) + 1
     # End of file.
@@ -51,7 +52,7 @@ def wing_from_data(input_data):
         first_word_fourth_line = input_data[3].split()[0]
         if not(third_line):
             # The dat format is Lednicer.
-            return lednicer_to_wing (input_data)
+            return wing_from_lednicer(input_data)
         else:
             # The dat format is selig.
-            return selig_to_wing(input_data)
+            return wing_from_selig(input_data)
