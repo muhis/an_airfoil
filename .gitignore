@@ -1,0 +1,7 @@
+files/
+ignore/
+lib/
+bin/
+__pycache__/
+include/
+pip-selfcheck.json
