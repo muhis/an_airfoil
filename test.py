@@ -5,12 +5,13 @@ def test():
     f = open(input_file, 'r').read().split('\n')
     return wfd(f)
 def test2():
-    f = open('test_sample/lednicer.txt').read().split('\n')
+    f = open('test_sample/selig.txt').read().split('\n')
     return wfd(f)
 def test3():
     f = open('test_sample/bng.txt').read().split('\n')
     return wfd(f)
-wing1 = test2()
-wing2 = test3()
+
 def test4():
-    equate(wing1, wing2)
+    wing1 = test2()
+    wing2 = test3()
+    return equate(wing1, wing2)
