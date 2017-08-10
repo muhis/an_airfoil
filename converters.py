@@ -1,15 +1,17 @@
-from models import Wings
-def wing_from_lednicer(data):
+from models import AirFoil
+def airfoil_from_lednicer(data):
     middle_point = int((len(data) - 1) / 2) + 1
     # End of file.
     eof = len(data) - 1
     x = []
     y_positive = []
     y_negative = []
-    # Get the first half of the file, starting from 3 row until the middle point
+    # Get the first half of the file,
+    # starting from 3 row until the middle point
     for row in data[3:middle_point]:
         try:
-            # First item of the row is the x point, the second is the positive y point.
+            # First item of the row is the x point,
+            # the second is the positive y point.
             x.append(float(row.split()[0]))
             y_positive.append(float(row.split()[1]))
         except ValueError:
@@ -20,9 +22,12 @@ def wing_from_lednicer(data):
             y_negative.append(float(row.split()[1]))
         except ValueError:
             pass
-    return Wings(description = data[0], x_points = x, y_positive = y_positive, y_negative = y_negative)
+    return AirFoil(
+        description=data[0], x_points=x,
+        y_positive=y_positive, y_negative=y_negative
+    )
 
-def wing_from_selig(data):
+def airfoil_from_selig(data):
     middle_point = int((len(data) - 1) / 2)
     # End of file
     eof = len(data) - 1
@@ -42,9 +47,12 @@ def wing_from_selig(data):
             y_negative.append(float(row.split()[1]))
         except ValueError:
             pass
-    return Wings(description = data[0], x_points = x, y_positive = y_positive, y_negative = y_negative)
+    return AirFoil(
+        description=data[0], x_points=x,
+        y_positive=y_positive, y_negative=y_negative
+    )
 
-def wing_from_data(input_data):
+def airfoil_from_data(input_data):
     # Variable is not empty
     if input_data:
         # determine file format: selig or Lednicer
@@ -52,7 +60,7 @@ def wing_from_data(input_data):
         first_word_fourth_line = input_data[3].split()[0]
         if not(third_line):
             # The dat format is Lednicer.
-            return wing_from_lednicer(input_data)
+            return airfoil_from_lednicer(input_data)
         else:
             # The dat format is selig.
-            return wing_from_selig(input_data)
+            return airfoil_from_selig(input_data)
