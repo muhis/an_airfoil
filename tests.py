@@ -1,8 +1,9 @@
 """Tests for an_airfoil main functionalities."""
 import unittest
 from models import airfoil_from_data as afd
-from models import AirFoil, airfoil_from_database, populate_db_from_zip
-from equity import equate
+from models import (
+    AirFoil, airfoil_from_database, populate_db_from_zip, equate
+)
 from tinydb import TinyDB, Query
 objects = Query()
 
