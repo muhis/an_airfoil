@@ -79,6 +79,16 @@ class AirFoil():
         plt.plot(self.x_coordinates, self.y_coordinates())
         plt.show()
 
+    def as_dict(self):
+        """Return dictionary of the airfoil."""
+        return {
+            'x_points': self.x_coordinates,
+            'y_positive': self.y_coordinates_positive,
+            'y_negative': self.y_coordinates_negative,
+            'description': self.description,
+            'name': self.name
+        }
+
     def save(self, db=tinydb.TinyDB('airfoils.json')):
         """
         Save the airfoil object to the database.
@@ -204,6 +214,10 @@ def populate_db_from_zip(zip_path,  db=tinydb.TinyDB('airfoils.json')):
                     name=airfoil_name,
                     input_data=airfoil_file
                 )
-                air_foil.save(db=db)
+                air_foils_list.append(air_foil.as_dict())
             except Exception:
-                print('Failed while trying file %s with exception.' % name)
+                print('Failed while trying parsing %s with exception.' % name)
+        try:
+            db.insert_multiple(air_foils_list)
+        except Exception:
+            print('Failed while inserting the airfoils into the databse')
