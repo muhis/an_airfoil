@@ -1,7 +1,7 @@
 """Tests for an_airfoil main functionalities."""
 import unittest
 from models import airfoil_from_data as afd
-from models import AirFoil, airfoil_from_database
+from models import AirFoil, airfoil_from_database, populate_db_from_zip
 from equity import equate
 from tinydb import TinyDB, Query
 objects = Query()
@@ -94,7 +94,7 @@ class TestAirFoil(unittest.TestCase):
         airfoil_attribs_from_db = self.test_db.get(objects.name == 'test')
         self.assertEqual(
             test_airfoil.x_coordinates,
-            airfoil_attribs_from_db['x_coordinates']
+            airfoil_attribs_from_db['x_points']
         )
         self.assertEqual(
             test_airfoil.y_coordinates_positive,
@@ -134,6 +134,32 @@ class TestAirFoil(unittest.TestCase):
     def tearDown(self):
         """Delete test objects from test database."""
         self.test_db.purge()
+
+
+class TestBuildFromZip(unittest.TestCase):
+    """Build the database from a zip file."""
+
+    def setUp(self):
+        """Construct test needed objects."""
+        from tinydb.storages import MemoryStorage
+        self.test_db = TinyDB(storage=MemoryStorage)
+
+    def test_build_db(self):
+        """Test that the zip file is correctly parsed and saved"""
+        path = 'tests_fixtures/test.zip'
+        populate_db_from_zip(zip_path=path, db=self.test_db)
+        selig_object = self.test_db.get(objects.name == 'selig')
+        bng_object = self.test_db.get(objects.name == 'bng')
+        self.assertIsNotNone(selig_object)
+        self.assertIsNotNone(bng_object)
+        self.assertEqual(len(selig_object['x_points']), 35)
+        self.assertEqual(len(bng_object['x_points']), 11)
+
+    def test_bad_zip(self):
+        """If the zip not given an archive, it should raise an exception"""
+        import zipfile
+        with self.assertRaises(zipfile.BadZipFile):
+            populate_db_from_zip(zip_path='test.py')
 
 
 if __name__ == '__main__':

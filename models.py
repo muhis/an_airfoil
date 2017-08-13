@@ -2,6 +2,9 @@ from scipy.interpolate import interp1d
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import tinydb
+import logging
+
+
 db = tinydb.TinyDB('airfoils.json')
 objects = tinydb.Query()
 
@@ -97,7 +100,7 @@ class AirFoil():
         db.insert(
             {
                 'name': self.name,
-                'x_coordinates': self.x_coordinates,
+                'x_points': self.x_coordinates,
                 'y_positive': self.y_coordinates_positive,
                 'y_negative': self.y_coordinates_negative,
                 'description': self.description
@@ -188,3 +191,22 @@ def airfoil_from_database(name, db=tinydb.TinyDB('airfoils.json')):
             name,
             db
         )
+
+
+def populate_db_from_zip(zip_path,  db=tinydb.TinyDB('airfoils.json')):
+    """Parse zip archive and convert each file to an entry in the databas."""
+    import zipfile
+    if not zipfile.is_zipfile(zip_path):
+        raise zipfile.BadZipFile(
+            'Zip file in path %s can not be parsed' %
+            zip_path
+        )
+    with zipfile.ZipFile(zip_path, mode='r') as zip_object:
+        for name in zip_object.namelist():
+            airfoil_file = str(zip_object.read(name)).split('\\n')
+            airfoil_name = name.split('.')[0]
+            air_foil = airfoil_from_data(
+                name=airfoil_name,
+                input_data=airfoil_file
+            )
+            air_foil.save(db=db)
