@@ -79,6 +79,16 @@ class AirFoil():
         plt.plot(self.x_coordinates, self.y_coordinates())
         plt.show()
 
+    def as_dict(self):
+        """Return dictionary of the airfoil."""
+        return {
+            'x_points': self.x_coordinates,
+            'y_positive': self.y_coordinates_positive,
+            'y_negative': self.y_coordinates_negative,
+            'description': self.description,
+            'name': self.name
+        }
+
     def save(self, db=tinydb.TinyDB('airfoils.json')):
         """
         Save the airfoil object to the database.
@@ -88,14 +98,7 @@ class AirFoil():
         """
         previous_object = db.contains(objects.name == self.name)
         if previous_object:
-            db.update({
-                'x_coordinates': self.x_coordinates,
-                'y_coordinates_pos': self.y_coordinates_positive,
-                'y_coordinates_neg': self.y_coordinates_negative,
-                'description': self.description
-            },
-                objects.name == self.name
-            )
+            db.remove(objects.name == self.name)
         # The object can not be found
         db.insert(
             {
@@ -167,11 +170,8 @@ def airfoil_from_selig(data, name):
 
 
 def airfoil_from_data(input_data, name):
-    # Variable is not empty
-    if input_data:
         # determine file format: selig or Lednicer
         third_line = input_data[2]
-        first_word_fourth_line = input_data[3].split()[0]
         if not(third_line):
             # The dat format is Lednicer.
             return airfoil_from_lednicer(input_data, name)
@@ -202,11 +202,22 @@ def populate_db_from_zip(zip_path,  db=tinydb.TinyDB('airfoils.json')):
             zip_path
         )
     with zipfile.ZipFile(zip_path, mode='r') as zip_object:
+        air_foils_list = []
         for name in zip_object.namelist():
-            airfoil_file = str(zip_object.read(name)).split('\\n')
-            airfoil_name = name.split('.')[0]
-            air_foil = airfoil_from_data(
-                name=airfoil_name,
-                input_data=airfoil_file
-            )
-            air_foil.save(db=db)
+            try:
+                airfoil_file = zip_object.read(name).decode('utf8').split('\n')
+                if len(airfoil_file) < 2:
+                    continue
+                airfoil_name = name.split('/')[1].split('.')[0]
+
+                air_foil = airfoil_from_data(
+                    name=airfoil_name,
+                    input_data=airfoil_file
+                )
+                air_foils_list.append(air_foil.as_dict())
+            except Exception:
+                print('Failed while trying parsing %s with exception.' % name)
+        try:
+            db.insert_multiple(air_foils_list)
+        except Exception:
+            print('Failed while inserting the airfoils into the databse')

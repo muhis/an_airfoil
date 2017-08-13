@@ -120,15 +120,15 @@ class TestAirFoil(unittest.TestCase):
         airfoil_attribs_from_db = self.test_db.get(objects.name == 'test')
         self.assertEqual(
             test_airfoil.x_coordinates,
-            airfoil_attribs_from_db['x_coordinates']
+            airfoil_attribs_from_db['x_points']
         )
         self.assertEqual(
             test_airfoil.y_coordinates_positive,
-            airfoil_attribs_from_db['y_coordinates_pos']
+            airfoil_attribs_from_db['y_positive']
         )
         self.assertEqual(
             test_airfoil.y_coordinates_negative,
-            airfoil_attribs_from_db['y_coordinates_neg']
+            airfoil_attribs_from_db['y_negative']
         )
 
     def tearDown(self):
