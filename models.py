@@ -1,4 +1,6 @@
 from scipy.interpolate import interp1d
+from scipy.spatial.distance import cdist
+import numpy as np
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import tinydb
@@ -119,6 +121,17 @@ def equate(first_air_foil, second_air_foil):
     second_air_foil_copy = second_air_foil.x_coordinates[:]
     first_air_foil.interpolate(second_air_foil_copy)
     second_air_foil.interpolate(first_airfoil_copy)
+
+
+def distance_between_curves_std(first_curve, second_curve):
+    """Return the distance between points in two curves(Standard deviation)."""
+    # First we equate the two curves to have similar amount of points.
+    if len(first_curve) != len(second_curve):
+        raise Exception('The curves are not equal, equate airfoild first.')
+
+    first_array = np.array(first_curve)
+    second_array = np.array(second_curve)
+    return (sum((first_array-second_array)**2)/3)**0.5
 
 
 def airfoil_from_lednicer(data, name):

@@ -2,7 +2,8 @@
 import unittest
 from models import airfoil_from_data as afd
 from models import (
-    AirFoil, airfoil_from_database, populate_db_from_zip, equate
+    AirFoil, airfoil_from_database, populate_db_from_zip, equate,
+    distance_between_curves_std
 )
 from tinydb import TinyDB, Query
 objects = Query()
@@ -161,6 +162,24 @@ class TestBuildFromZip(unittest.TestCase):
         import zipfile
         with self.assertRaises(zipfile.BadZipFile):
             populate_db_from_zip(zip_path='test.py')
+
+
+class TestDistance(unittest.TestCase):
+    """Test the functions related to distance calculation."""
+
+    def test_not_equal_curves(self):
+        """The function should not accept unequal curves."""
+        with self.assertRaises(Exception):
+            distance_between_curves_std(
+                [1, 2, 3], [1, 2, 3, 4]
+            )
+
+    def test_distance_std(self):
+        """Test stadnard deviation distance between two curves."""
+        distance = distance_between_curves_std(
+            [1, 2, 3, 4], [1.5, 2.5, 3.5, 4.5]
+        )
+        self.assertEqual(distance, 0.57735026918962573)
 
 
 if __name__ == '__main__':
