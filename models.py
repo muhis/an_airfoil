@@ -249,7 +249,14 @@ def compare_airfoils(main_air_foil, comparison_airfoils):
     """Return a dictionary of the results of std comparison."""
     results = {}
     for air_foil in comparison_airfoils:
-        equate(main_air_foil, air_foil)
+        main_airfoil_copy = AirFoil(
+            name='copy',
+            x_points=main_air_foil.x_coordinates[:],
+            y_positive=main_air_foil.y_coordinates_positive[:],
+            y_negative=main_air_foil.y_coordinates_negative[:],
+            description='copy'
+        )
+        equate(main_airfoil_copy, air_foil)
         y_pos_distance = distance_between_curves_std(
             main_air_foil.y_coordinates_positive,
             air_foil.y_coordinates_positive
