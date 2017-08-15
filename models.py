@@ -127,7 +127,7 @@ def distance_between_curves_std(first_curve, second_curve):
     """Return the distance between points in two curves(Standard deviation)."""
     # First we equate the two curves to have similar amount of points.
     if len(first_curve) != len(second_curve):
-        raise Exception('The curves are not equal, equate airfoild first.')
+        raise Exception('The curves are not equal, equate airfoils first.')
 
     first_array = np.array(first_curve)
     second_array = np.array(second_curve)
@@ -243,3 +243,22 @@ def populate_db_from_zip(zip_path,  db=tinydb.TinyDB('airfoils.json')):
             db.insert_multiple(air_foils_list)
         except Exception:
             print('Failed while inserting the airfoils into the databse')
+
+
+def compare_airfoils(main_air_foil, comparison_airfoils):
+    """Return a dictionary of the results of std comparison."""
+    results = {}
+    for air_foil in comparison_airfoils:
+        equate(main_air_foil, air_foil)
+        y_pos_distance = distance_between_curves_std(
+            main_air_foil.y_coordinates_positive,
+            air_foil.y_coordinates_positive
+        )
+        y_neg_distance = distance_between_curves_std(
+            main_air_foil.y_coordinates_positive,
+            air_foil.y_coordinates_negative
+        )
+        results[air_foil.name] = (
+            (y_pos_distance ** 2) + (y_neg_distance ** 2)
+        ) ** 2
+        return results

@@ -3,7 +3,8 @@ import unittest
 from models import airfoil_from_data as afd
 from models import (
     AirFoil, airfoil_from_database, populate_db_from_zip, equate,
-    distance_between_curves_std
+    distance_between_curves_std,
+    compare_airfoils
 )
 from tinydb import TinyDB, Query
 objects = Query()
@@ -167,6 +168,17 @@ class TestBuildFromZip(unittest.TestCase):
 class TestDistance(unittest.TestCase):
     """Test the functions related to distance calculation."""
 
+    def setUp(self):
+        """Construct test needed objects."""
+        from tinydb.storages import MemoryStorage
+        self.test_db = TinyDB(storage=MemoryStorage)
+        path = 'tests_fixtures/test.zip'
+        populate_db_from_zip(zip_path=path, db=self.test_db)
+        self.fixture_airfoils = [
+            airfoil_from_database('selig', db=self.test_db),
+            airfoil_from_database('bng', db=self.test_db)
+        ]
+
     def test_not_equal_curves(self):
         """The function should not accept unequal curves."""
         with self.assertRaises(Exception):
@@ -180,6 +192,16 @@ class TestDistance(unittest.TestCase):
             [1, 2, 3, 4], [1.5, 2.5, 3.5, 4.5]
         )
         self.assertEqual(distance, 0.57735026918962573)
+
+    def test_compare_airfoils(self):
+        """Test the function compare airfoils."""
+        compare_results = compare_airfoils(
+            self.fixture_airfoils[0], self.fixture_airfoils
+        )
+        result_fixture = {
+            'selig': 0.0018230416652564628
+        }
+        self.assertEqual(compare_results, result_fixture)
 
 
 if __name__ == '__main__':
