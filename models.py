@@ -1,4 +1,6 @@
 from scipy.interpolate import interp1d
+from scipy.spatial.distance import cdist
+import numpy as np
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import tinydb
@@ -112,6 +114,26 @@ class AirFoil():
         pass
 
 
+def equate(first_air_foil, second_air_foil):
+    """Take two airfoil objects and interpolate both of them."""
+    # Take copy of the x_coordinates before the change.
+    first_airfoil_copy = first_air_foil.x_coordinates[:]
+    second_air_foil_copy = second_air_foil.x_coordinates[:]
+    first_air_foil.interpolate(second_air_foil_copy)
+    second_air_foil.interpolate(first_airfoil_copy)
+
+
+def distance_between_curves_std(first_curve, second_curve):
+    """Return the distance between points in two curves(Standard deviation)."""
+    # First we equate the two curves to have similar amount of points.
+    if len(first_curve) != len(second_curve):
+        raise Exception('The curves are not equal, equate airfoils first.')
+
+    first_array = np.array(first_curve)
+    second_array = np.array(second_curve)
+    return (sum((first_array-second_array)**2)/3)**0.5
+
+
 def airfoil_from_lednicer(data, name):
     middle_point = int((len(data) - 1) / 2) + 1
     # End of file.
@@ -221,3 +243,29 @@ def populate_db_from_zip(zip_path,  db=tinydb.TinyDB('airfoils.json')):
             db.insert_multiple(air_foils_list)
         except Exception:
             print('Failed while inserting the airfoils into the databse')
+
+
+def compare_airfoils(main_air_foil, comparison_airfoils):
+    """Return a dictionary of the results of std comparison."""
+    results = {}
+    for air_foil in comparison_airfoils:
+        main_airfoil_copy = AirFoil(
+            name='copy',
+            x_points=main_air_foil.x_coordinates[:],
+            y_positive=main_air_foil.y_coordinates_positive[:],
+            y_negative=main_air_foil.y_coordinates_negative[:],
+            description='copy'
+        )
+        equate(main_airfoil_copy, air_foil)
+        y_pos_distance = distance_between_curves_std(
+            main_air_foil.y_coordinates_positive,
+            air_foil.y_coordinates_positive
+        )
+        y_neg_distance = distance_between_curves_std(
+            main_air_foil.y_coordinates_positive,
+            air_foil.y_coordinates_negative
+        )
+        results[air_foil.name] = (
+            (y_pos_distance ** 2) + (y_neg_distance ** 2)
+        ) ** 2
+        return results
